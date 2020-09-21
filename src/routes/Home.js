@@ -1,32 +1,59 @@
 import React, { useEffect, useState } from "react";
 import { dbService } from "fbase";
+import { storageService } from "fbase";
+import { v4 as uuidv4 } from "uuid";
+
 import Nweet from "components/Nweet";
 
 const Home = ({ userObj }) => {
   const [nweet, setNweet] = useState("");
   const [nweets, setNweets] = useState([]);
-  const [attachment, setAttachment] = useState();
+  const [attachment, setAttachment] = useState("");
 
   useEffect(() => {
-    dbService()
-      .collection("nweets")
-      .onSnapshot((snapshot) => {
-        const nweetArray = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setNweets(nweetArray);
-      });
+    dbService.collection("nweets").onSnapshot((snapshot) => {
+      const nweetArray = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setNweets(nweetArray);
+    });
   }, []);
 
   const onSubmit = async (event) => {
     event.preventDefault();
-    await dbService().collection("nweets").add({
+    //https://firebase.google.com/docs/storage/web/upload-files 참고
+    let attachmentUrl = "";
+    if (attachment !== "") {
+      const attachmentRef = storageService
+        .ref()
+        .child(`${userObj.uid}/${uuidv4()}`);
+      const response = await attachmentRef.putString(attachment, "data_url");
+      attachmentUrl = await response.ref.getDownloadURL();
+    }
+    const nweetObj = {
+      text: nweet,
+      createdAt: Date.now(),
+      creatorId: userObj.uid,
+      attachmentUrl,
+    };
+    await dbService.collection("nweets").add(nweetObj);
+    setNweet("");
+    setAttachment("");
+
+    // 이하  firebase 기능
+    /*const fileRef = storageService().ref().child(`${userObj.uid}/${uuidv4()}`);
+    const response = await fileRef.putString(attachment, "data_url");
+    console.log("리스폰스");
+    console.log(response);*/
+    {
+      /*await dbService.collection("nweets").add({
       text: nweet,
       createdAt: Date.now(),
       creatorId: userObj.uid,
     });
-    setNweet("");
+  setNweet(""); */
+    }
   };
 
   const onChange = async (event) => {
@@ -56,7 +83,7 @@ const Home = ({ userObj }) => {
         currentTarget: { result },
       } = finishedEvent;
       //최신 es6 문법, 객체 안에있는거 그대로 꺼내오기(이름포함)
-      setAttachment(result);
+      setAttachment(result); // 여기서 attachment 에 값이 생긴다
       // 0. input type file로 파일 넣기.
       // 1. event.target.file[0] 이용,  FileReader API 호출 및 넣기
       // 2. readAsDataURL 로 변형하기

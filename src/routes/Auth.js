@@ -27,12 +27,12 @@ const Auth = () => {
     let data;
     try {
       if (newAccount) {
-        data = await authService().createUserWithEmailAndPassword(
+        data = await authService.createUserWithEmailAndPassword(
           email,
           password
         );
       } else {
-        data = await authService().signInWithEmailAndPassword(email, password);
+        data = await authService.signInWithEmailAndPassword(email, password);
       }
       console.log(data);
     } catch (error) {
@@ -56,7 +56,7 @@ const Auth = () => {
       provider = new firebaseInstance.auth.GithubAuthProvider();
     }
 
-    const data = await authService().signInWithPopup(provider);
+    const data = await authService.signInWithPopup(provider);
     console.log(data);
   };
 

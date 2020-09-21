@@ -1,6 +1,7 @@
 import * as firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
+import "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBLavYPzEPHeqSUeEz1q68GOJCg6hss_90",
@@ -13,8 +14,11 @@ const firebaseConfig = {
 };
 // Initialize Firebase
 
-export const firebaseInstance = firebase;
-export const authService = firebase.auth;
-export const dbService = firebase.firestore;
 export default firebase.initializeApp(firebaseConfig);
+export const firebaseInstance = firebase;
+export const authService = firebase.auth();
+export const dbService = firebase.firestore();
+export const storageService = firebase.storage();
+
+// export default firebase.initializeApp();
 // firebase 초기 셋업하는 부분.
