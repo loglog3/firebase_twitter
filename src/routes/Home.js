@@ -5,6 +5,7 @@ import Nweet from "components/Nweet";
 const Home = ({ userObj }) => {
   const [nweet, setNweet] = useState("");
   const [nweets, setNweets] = useState([]);
+  const [attachment, setAttachment] = useState();
 
   useEffect(() => {
     dbService()
@@ -35,6 +36,38 @@ const Home = ({ userObj }) => {
     } = event;
     setNweet(value);
   };
+
+  const onFileChange = (event) => {
+    const {
+      target: { files },
+    } = event;
+    console.log("파일즈");
+    console.log(files);
+    console.log("파일즈[0]");
+    const theFile = files[0];
+    console.log(files[0]);
+
+    const reader = new FileReader();
+    reader.readAsDataURL(theFile);
+    reader.onloadend = (finishedEvent) => {
+      console.log("온로드엔드 이벤트");
+      console.log(finishedEvent);
+      const {
+        currentTarget: { result },
+      } = finishedEvent;
+      //최신 es6 문법, 객체 안에있는거 그대로 꺼내오기(이름포함)
+      setAttachment(result);
+      // 0. input type file로 파일 넣기.
+      // 1. event.target.file[0] 이용,  FileReader API 호출 및 넣기
+      // 2. readAsDataURL 로 변형하기
+      // 3. onloadend 메소드 이용, event.currentTarget.result 로 결과값받기
+      // 4. 이 result가 img src={result} 가 되는 것
+      // 본질은 file을 업로드하고 그것을 string으로 바꾸는 것
+    };
+  };
+
+  const onClearAttachment = () => setAttachment(null);
+
   return (
     <div>
       <form onSubmit={onSubmit}>
@@ -46,7 +79,14 @@ const Home = ({ userObj }) => {
           maxLength={120}
         />
         <input type="submit" value="Nweet" />
+        {attachment && (
+          <div>
+            <img src={attachment} width="50px" height="50px" />
+            <button onClick={onClearAttachment}>Clear</button>
+          </div>
+        )}
       </form>
+      <input type="file" accept="image/*" onChange={onFileChange} />
       <div>
         {nweets.map((nweet) => (
           <Nweet
